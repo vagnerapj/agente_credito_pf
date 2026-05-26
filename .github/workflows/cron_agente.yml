@@ -1,0 +1,35 @@
+name: Execucao Diaria do Agente de Credito
+
+on:
+  schedule:
+    # Roda às 07:00 da manhã no horário de Brasília (10:00 UTC), de segunda a sexta.
+    - cron: '0 10 * * 1-5'
+  workflow_dispatch: # Permite que você clique num botão para rodar manualmente se quiser teste rápido
+
+jobs:
+  rodar-agente:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Copiar codigo do repositorio
+      uses: actions/checkout@v3
+
+    - name: Configurar o Python
+      uses: actions/with-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Instalar bibliotecas necessarias
+      run: |
+        python -m pip install --upgrade pip
+        pip install google-genai feedparser requests python-dotenv
+
+    - name: Rodar o Script do Agente de Credito
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        CALLMEBOT_API_KEY: ${{ secrets.CALLMEBOT_API_KEY }}
+        CALLMEBOT_PHONE: ${{ secrets.CALLMEBOT_PHONE }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USER: ${{ secrets.GITHUB_USER }}
+        GITHUB_REPO: "agente_credito_pf"
+      run: python agente_credito.py
