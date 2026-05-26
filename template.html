@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Briefing de Crédito PF</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 650px; margin: 20px auto; background: #fff; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        .header { border-bottom: 3px solid #004481; padding-bottom: 18px; margin-bottom: 25px; }
+        .header h1 { color: #004481; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+        .date { color: #666; font-size: 14px; margin-top: 6px; }
+        .content { font-size: 15px; line-height: 1.7; color: #2c3e50; }
+        .content p { margin-bottom: 18px; }
+        .sources { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e1e8ed; }
+        .sources h3 { color: #555; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .sources ul { padding-left: 20px; font-size: 14px; color: #0066cc; margin: 0; }
+        .sources li { margin-bottom: 8px; }
+        a { color: #004481; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Briefing Diário: Crédito Pessoa Física</h1>
+            <div class='date'>📅 {{DATA_HOJE}} | Inteligência de Mercado</div>
+        </div>
+        <div class='content'>
+            {{CONTEUDO_IA}}
+        </div>
+        <div class='sources'>
+            <h3>Fontes Consultadas</h3>
+            <ul>
+                {{LINKS_FONTES}}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
