@@ -22,14 +22,12 @@ def buscar_noticias_credito():
     print("🔄 Iniciando curadoria estrita de notícias sobre crédito...")
     noticias_relevantes = []
     
-    # Termos obrigatórios que indicam forte relação com o mercado de crédito PF e macro
     termos_chave = [
         'crédito', 'inadimplência', 'juros', 'banco', 'financiamento', 
         'rotativo', 'serasa', 'banco central', 'selic', 'cheque especial', 
         'consignado', 'endividamento', 'tomada de crédito', 'carteira de crédito'
     ]
     
-    # Termos de bloqueio para eliminar ruídos e notícias irrelevantes do clipping
     termos_bloqueio = [
         'mega-sena', 'megasena', 'loteria', 'concurso', 'imóveis em joão pessoa', 
         'vagas de emprego', 'bolsa de valores', 'petrobras', 'vale', 'cripto', 
@@ -44,13 +42,10 @@ def buscar_noticias_credito():
                 resumo = noticia.get('summary', '')
                 texto_analise = (titulo + " " + resumo).lower()
                 
-                # Regra 1: Não pode conter nenhum termo de bloqueio
                 if any(bloqueio in texto_analise for bloqueio in termos_bloqueio):
                     continue
                     
-                # Regra 2: Deve conter pelo menos um dos termos-chave de crédito
                 if any(termo in texto_analise for termo in termos_chave):
-                    # Evita duplicidade de links de portais diferentes
                     if not any(n['link'] == noticia.link for n in noticias_relevantes):
                         noticias_relevantes.append({
                             "titulo": titulo,
@@ -67,7 +62,7 @@ def gerar_briefing_com_gemini(lista_noticias):
     if not lista_noticias:
         return "<p>Nenhuma movimentação expressiva de crédito PF reportada hoje.</p>", "Sem novidades relevantes."
         
-    print("🧠 Gemini analisando os impactos e estruturando os resumos...")
+    print("🧠 Gemini analisando os impactos e aplicando destaques executivos...")
     bloco_noticias = ""
     for i, n in enumerate(lista_noticias, 1):
         bloco_noticias += f"\n[{i}] TÍTULO: {n['titulo']}\nCONTEXTO: {n['resumo_original']}\nLINK: {n['link']}\n"
@@ -80,7 +75,11 @@ def gerar_briefing_com_gemini(lista_noticias):
         "Escreva a análise formatando DIRETAMENTE em parágrafos HTML (<p>). Use exatamente estes tópicos:\n"
         "<p>🚨 <b>PRINCIPAL MOVIMENTO:</b> [Análise do fato mais relevante] <a href='[LINK DA NOTÍCIA COMPATÍVEL]' target='_blank'>👉 Leia a matéria completa</a></p>\n"
         "<p>📊 <b>MACRO E JUROS:</b> [Impacto de juros, Selic ou inflação] <a href='[LINK DA NOTÍCIA COMPATÍVEL]' target='_blank'>👉 Leia a matéria completa</a></p>\n"
-        "<p>💳 <b>COMPORTAMENTO DO CONSUMIDOR:</b> [Inadimplência, endividamento ou tomada de crédito] <a href='[LINK DA NOTÍCIA COMPATÍVEL]' target='_blank'>👉 Leia a matéria completa</a></p>\n"
+        "<p>💳 <b>COMPORTAMENTO DO CONSUMIDOR:</b> [Inadimplência, endividamento ou tomada de crédito] <a href='[LINK DA NOTÍCIA COMPATÍVEL]' target='_blank'>👉 Leia a matéria completa</a></p>\n\n"
+        "DIRETRIZ DE DESTAQUE ANALÍTICO (OBRIGATÓRIO):\n"
+        "Dentro de cada parágrafo do relatório HTML acima, aplique a tag <b>...</b> para destacar em negrito as palavras ou expressões-chave que justificam a importância do fato para o ecossistema de crédito PF.\n"
+        "Exemplos de termos para destacar: variações de taxas (ex: 'alta de 0,5 p.p.'), indicadores de risco (ex: 'alavancagem das famílias', 'inadimplência do rotativo', 'perfil de risco'), ou movimentos de mercado (ex: 'restrição de concessão', 'alongamento de prazo').\n"
+        "Seja cirúrgico: destaque apenas 2 ou 3 expressões cruciais por parágrafo para manter a escaneabilidade do texto.\n"
         "Nota: Identifique qual link do clipping melhor se associa a cada tema e coloque-o no respectivo 'href'.\n\n"
         "[DIVISOR]\n\n"
         "VERSÃO 2: Resumo de Pocket (WhatsApp)\n"
@@ -146,7 +145,7 @@ def publicar_no_github(html_conteudo):
         sha = res_get.json().get("sha")
         
     dados = {
-        "message": f"Atualizando briefing matinal - {datetime.now().strftime('%d/%m/%Y')}",
+        "message": f"Atualizando briefing matinal com destaques analiticos - {datetime.now().strftime('%d/%m/%Y')}",
         "content": base64.b64encode(html_conteudo.encode('utf-8')).decode('utf-8')
     }
     if sha:
@@ -175,7 +174,7 @@ if __name__ == "__main__":
     noticias_do_dia = buscar_noticias_credito()
     briefing_html, resumo_zap = gerar_briefing_com_gemini(noticias_do_dia)
     pagina_html = construir_pagina_html(briefing_html, noticias_do_dia)
-    link_da_pagina = publicar_no_github(pagina_html)
+    link_da_pagina = PUBLICAR_NO_GITHUB(pagina_html)
     
     if link_da_pagina:
         time.sleep(5)
