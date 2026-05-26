@@ -2,7 +2,7 @@ import os
 import base64
 import feedparser
 import requests
-import time  # <-- ADICIONE ESTA LINHA AQUI
+import time
 from google import genai
 from dotenv import load_dotenv
 from datetime import datetime
@@ -12,9 +12,13 @@ load_dotenv()
 
 client = genai.Client()
 
+# 2. LISTA EXPANDIDA DE PORTAIS (Feeds RSS oficiais de Economia e Finanças)
 FONTES_NOTICIAS = [
-    "https://valor.globo.com/rss/financas/",
-    "https://www.infomoney.com.br/onde-investir/feed/"
+    "https://valor.globo.com/rss/financas/",           # Valor Econômico
+    "https://www.infomoney.com.br/onde-investir/feed/", # InfoMoney
+    "https://g1.globo.com/rss/g1/economia/",            # G1 Globo Economia
+    "https://economia.estadao.com.br/rss/",            # Estadão Economia
+    "https://rss.folha.uol.com.br/mercado.xml"          # Folha de S.Paulo Mercado
 ]
 
 def buscar_noticias_credito():
@@ -23,18 +27,21 @@ def buscar_noticias_credito():
     termos_chave = ['crédito', 'inadimplência', 'juros', 'banco', 'financiamento', 'rotativo', 'serasa', 'banco central', 'selic']
     
     for url in FONTES_NOTICIAS:
-        feed = feedparser.parse(url)
-        for noticia in feed.entries:
-            titulo = noticia.title
-            resumo = noticia.get('summary', '')
-            texto_analise = (titulo + " " + resumo).lower()
-            
-            if any(termo in texto_analise for termo in termos_chave):
-                noticias_relevantes.append({
-                    "titulo": titulo,
-                    "link": noticia.link,
-                    "resumo_original": resumo
-                })
+        try:
+            feed = feedparser.parse(url)
+            for noticia in feed.entries:
+                titulo = noticia.title
+                resumo = noticia.get('summary', '')
+                texto_analise = (titulo + " " + resumo).lower()
+                
+                if any(termo in texto_analise for termo in termos_chave):
+                    noticias_relevantes.append({
+                        "titulo": titulo,
+                        "link": noticia.link,
+                        "resumo_original": resumo
+                    })
+        except Exception as e:
+            print(f"⚠️ Erro ao ler o portal {url}: {e}")
                 
     print(f"✅ Coleta finalizada. Encontradas {len(noticias_relevantes)} notícias sobre crédito.")
     return noticias_relevantes[:10]
@@ -75,8 +82,12 @@ def construir_pagina_html(conteudo_ia, lista_noticias):
     conteudo_formatado = conteudo_ia.replace("\n", "<br>")
     
     links_html = ""
+    # Remove duplicatas de links no rodapé
+    links_vistos = set()
     for n in lista_noticias:
-        links_html += f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>"
+        if n['link'] not in links_vistos:
+            links_vistos.add(n['link'])
+            links_html += f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>"
 
     html = f"""
     <!DOCTYPE html>
@@ -161,7 +172,6 @@ def publicar_no_github(html_conteudo):
         print(f"❌ Erro ao enviar para o GitHub: {res_put.text}")
         return None
 
-# --- NOVA FUNÇÃO DE ALERTA DO WHATSAPP ---
 def enviar_alerta_whatsapp(link_painel):
     print("📲 Acionando o Callmebot para enviar o WhatsApp...")
     phone = os.getenv("CALLMEBOT_PHONE")
@@ -169,23 +179,30 @@ def enviar_alerta_whatsapp(link_painel):
     
     data_hoje = datetime.now().strftime("%d/%m/%Y")
     
-    # Texto curto e elegante para o WhatsApp
     texto_mensagem = (
         f"💼 *Briefing de Crédito PF* - {data_hoje}\n\n"
-        f"Olá! O seu relatório executivo matinal de inteligência de mercado já foi processado e está disponível.\n\n"
+        f"Olá! O seu relatório executivo matinal de inteligência de mercado já foi processado e está disponível com dados atualizados do Valor, G1, Estadão e Folha.\n\n"
         f"🔗 *Acesse o painel completo aqui:* {link_painel}"
     )
     
-    # Codifica o texto para URL padrão
     texto_url = requests.utils.quote(texto_mensagem)
     url_callmebot = f"https://api.callmebot.com/whatsapp.php?phone={phone}&text={texto_url}&apikey={apikey}"
     
+    # Validação das credenciais no console do GitHub
+    if phone and apikey:
+        print(f"📞 Enviando para o número final: ...{str(phone)[-4:]} usando API Key inicial: {str(apikey)[:4]}...")
+    else:
+        print("❌ ERRO CRÍTICO: As chaves do Callmebot vieram vazias do cofre do GitHub! Verifique o menu Secrets.")
+    
     try:
         response = requests.get(url_callmebot)
+        print(f"📡 Resposta do servidor Callmebot: Status {response.status_code}")
+        print(f"💬 Conteúdo retornado pelo Callmebot: {response.text}")
+        
         if response.status_code == 200:
-            print("🚀 Notificação enviada com sucesso para o seu celular!")
+            print("🚀 Processo de notificação concluído!")
         else:
-            print(f"⚠️ Callmebot retornou status: {response.status_code}")
+            print("⚠️ Callmebot recusou os parâmetros enviados.")
     except Exception as e:
         print(f"❌ Falha ao disparar o WhatsApp: {e}")
 
@@ -195,11 +212,9 @@ if __name__ == "__main__":
     briefing_txt = gerar_briefing_com_gemini(noticias_do_dia)
     pagina_html = construir_pagina_html(briefing_txt, noticias_do_dia)
     
-    # Executa a publicação e captura o link público gerado
     link_da_pagina = publicar_no_github(pagina_html)
-
-    # Se o link foi gerado, espera o GitHub Pages atualizar e dispara o Zap
+    
     if link_da_pagina:
-        print("⏳ Aguardando 10 segundos para o GitHub Pages indexar a página...")
-        time.sleep(10) # <-- ADICIONE ESTA LINHA AQUI
+        print("⏳ Aguardando 10 segundos para indexação do GitHub Pages...")
+        time.sleep(10)
         enviar_alerta_whatsapp(link_da_pagina)
