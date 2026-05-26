@@ -2,9 +2,9 @@ name: Execucao Diaria do Agente de Credito
 
 on:
   schedule:
-    # Roda às 07:00 da manhã no horário de Brasília (10:00 UTC), de segunda a sexta.
+    # 10:00 UTC corresponde exatamente às 07:00 no horário de Brasília
     - cron: '0 10 * * 1-5'
-  workflow_dispatch: # Permite que você clique num botão para rodar manualmente se quiser teste rápido
+  workflow_dispatch: # Mantém o botão de rodar manualmente ativo
 
 jobs:
   rodar-agente:
