@@ -2,6 +2,7 @@ import os
 import base64
 import feedparser
 import requests
+import time  # <-- ADICIONE ESTA LINHA AQUI
 from google import genai
 from dotenv import load_dotenv
 from datetime import datetime
@@ -196,7 +197,9 @@ if __name__ == "__main__":
     
     # Executa a publicação e captura o link público gerado
     link_da_pagina = publicar_no_github(pagina_html)
-    
-    # Se o link foi gerado, dispara o Zap
+
+    # Se o link foi gerado, espera o GitHub Pages atualizar e dispara o Zap
     if link_da_pagina:
+        print("⏳ Aguardando 10 segundos para o GitHub Pages indexar a página...")
+        time.sleep(10) # <-- ADICIONE ESTA LINHA AQUI
         enviar_alerta_whatsapp(link_da_pagina)
