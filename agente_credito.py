@@ -137,8 +137,17 @@ def publicar_no_github(html_conteudo):
     print("🚀 Enviando relatório para o GitHub...")
     token = os.getenv("GITHUB_TOKEN")
     user = os.getenv("GITHUB_USER")
-    repo = os.getenv("GITHUB_REPO")
     
+    # GITHUB_REPOSITORY vem automaticamente no formato "usuario/nome-do-repo"
+    repo_completo = os.getenv("GITHUB_REPOSITORY") 
+    
+    if repo_completo:
+        # Extrai apenas o nome do repositório depois da barra
+        repo = repo_completo.split("/")[-1]
+    else:
+        # Fallback caso rode localmente
+        repo = os.getenv("GITHUB_REPO", "agente_credito_pf")
+        
     filename = "index.html"
     url = f"https://api.github.com/repos/{user}/{repo}/contents/{filename}"
     
