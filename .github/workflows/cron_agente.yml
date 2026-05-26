@@ -3,7 +3,7 @@ name: Execucao Diaria do Agente de Credito
 on:
   schedule:
     # 10:00 UTC corresponde exatamente às 07:00 no horário de Brasília
-    - cron: '48 11 * * *'
+    - cron: '0 10 * * 1-5'
   workflow_dispatch: # Mantém o botão de rodar manualmente ativo
 
 jobs:
