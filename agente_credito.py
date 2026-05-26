@@ -57,7 +57,7 @@ def gerar_briefing_com_gemini(lista_noticias):
         
     prompt = f"""
     Você é um Analista Sênior de Inteligência de Mercado especializado em Crédito Bancário e Varejo (PF).
-    Com base nas notícias do dia, você deve gerar DUAS saídas estritamente profissionais, separadas por uma linha de hífens "---".
+    Com base nas notícias do dia, você deve gerar DUAS saídas estritamente profissionais, separadas por uma linha de hífens exatamente como esta: ---
 
     VERSÃO 1: Relatório Completo (HTML)
     Escreva uma análise aprofundada estruturada nestes 3 tópicos:
@@ -69,7 +69,7 @@ def gerar_briefing_com_gemini(lista_noticias):
 
     VERSÃO 2: Resumo de Bolso (WhatsApp)
     Escreva um resumo ultra-executivo, direto e focado no ecossistema de crédito e bancos. 
-    Use no máximo 3 tópicos curtos (máximo uma linha por tópico). Mantenha o texto extremamente enxuto para caber no limite de caracteres de SMS/WhatsApp.
+    Use no máximo 3 tópicos curtos de uma única linha cada, usando marcadores simples (ex: * • ). Mantenha o texto extremamente enxuto.
 
     Notícias do dia:
     {bloco_noticias}
@@ -80,7 +80,6 @@ def gerar_briefing_com_gemini(lista_noticias):
         contents=prompt,
     )
     
-    # Separa as duas versões geradas pela IA usando a linha de hífens
     partes = response.text.split("---")
     
     html_txt = partes[0].strip()
@@ -100,13 +99,61 @@ def construir_pagina_html(conteudo_ia, lista_noticias):
             links_vistos.add(n['link'])
             links_html += f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>"
 
-    html = f"""
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Briefing de Crédito PF</title>
-        <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; }}
-            .container {{ max-width: 650px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(
+    html_code = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Briefing de Crédito PF</title>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; }}
+        .container {{ max-width: 650px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }}
+        .header {{ border-bottom: 2px solid #004481; padding-bottom: 15px; margin-bottom: 25px; }}
+        .header h1 {{ color: #004481; margin: 0; font-size: 24px; font-weight: 700; }}
+        .date {{ color: #666; font-size: 14px; margin-top: 5px; }}
+        .content {{ font-size: 16px; line-height: 1.6; color: #2c3e50; }}
+        .content br {{ margin-bottom: 10px; }}
+        .sources {{ margin-top: 35px; padding-top: 20px; border-top: 1px solid #e1e8ed; }}
+        .sources h3 {{ color: #555; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }}
+        .sources ul {{ padding-left: 20px; font-size: 14px; color: #0066cc; }}
+        .sources li {{ margin-bottom: 8px; }}
+        a {{ color: #004481; text-decoration: none; }}
+        a:hover {{ text-decoration: underline; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Briefing: Crédito Pessoa Física</h1>
+            <div class="date">📅 Atualizado em: {data_hoje} | Inteligência de Mercado</div>
+        </div>
+        <div class="content">
+            {conteudo_formatado}
+        </div>
+        <div class="sources">
+            <h3>Fontes Monitoradas no Dia</h3>
+            <ul>
+                {links_html}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>"""
+    return html_code
+
+def Skinner_id_repo_fix():
+    repo_completo = os.getenv("GITHUB_REPOSITORY")
+    if repo_completo:
+        return repo_completo.split("/")
+    return os.getenv("GITHUB_USER", "usuario"), os.getenv("GITHUB_REPO", "agente_credito_pf")
+
+def publicar_no_github(html_conteudo):
+    print("🚀 Enviando relatório para o GitHub...")
+    token = os.getenv("GITHUB_TOKEN")
+    user, repo = Skinner_id_repo_fix()
+    
+    if not token or not repo:
+        print("❌ ERRO: Credenciais do GitHub ausentes.")
+        return None
+        
+    filename =
