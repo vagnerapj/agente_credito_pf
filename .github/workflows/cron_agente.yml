@@ -1,10 +1,14 @@
 name: Execucao Diaria do Agente de Credito
 
+name: Execucao Diaria do Agente de Credito
+
 on:
+  push:
+    branches:
+      - main     # Sempre que você alterar um arquivo na main, o robô roda na hora!
   schedule:
-    # 10:00 UTC corresponde exatamente às 07:00 no horário de Brasília
     - cron: '0 10 * * 1-5'
-  workflow_dispatch: # Mantém o botão de rodar manualmente ativo
+  workflow_dispatch:
 
 jobs:
   rodar-agente:
