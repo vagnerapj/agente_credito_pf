@@ -10,8 +10,21 @@
         .header { border-bottom: 3px solid #004481; padding-bottom: 18px; margin-bottom: 25px; }
         .header h1 { color: #004481; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
         .date { color: #666; font-size: 14px; margin-top: 6px; }
+        
+        /* Estilos do Novo Sumário Executivo */
+        .executive-summary { background-color: #f9fbff; border-left: 4px solid #004481; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .executive-summary h3 { margin-top: 0; color: #004481; font-size: 17px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; }
+        .executive-summary ul { padding-left: 20px; margin: 0; list-style-type: disc; color: #333; font-size: 14.5px; line-height: 1.6; }
+        .executive-summary li { margin-bottom: 10px; }
+
         .content { font-size: 15px; line-height: 1.7; color: #2c3e50; }
         .content p { margin-bottom: 18px; }
+        
+        /* Estilos do Bloco "Por que importa" */
+        .why-it-matters { background-color: #f1f8ff; border: 1px solid #c8e1ff; padding: 18px; border-radius: 8px; margin-top: 25px; margin-bottom: 25px; }
+        .why-it-matters h4 { color: #004481; font-size: 15px; margin-top: 0; margin-bottom: 10px; font-weight: 700; }
+        .why-it-matters p { color: #24292e; font-size: 14px; line-height: 1.6; margin: 0; }
+
         .sources { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e1e8ed; }
         .sources h3 { color: #555; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
         .sources ul { padding-left: 20px; font-size: 14px; color: #0066cc; margin: 0; }
@@ -26,9 +39,18 @@
             <h1>Briefing Diário: Crédito Pessoa Física</h1>
             <div class='date'>📅 {{DATA_HOJE}} | Inteligência de Mercado</div>
         </div>
+
+        <div class='executive-summary'>
+            <h3>Sumário Executivo / Tópicos Rápidos</h3>
+            <ul>
+                {{TOPICOS_SUMARIO}}
+            </ul>
+        </div>
+
         <div class='content'>
             {{CONTEUDO_IA}}
         </div>
+        
         <div class='sources'>
             <h3>Fontes Consultadas</h3>
             <ul>
