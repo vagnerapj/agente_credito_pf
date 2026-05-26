@@ -57,20 +57,21 @@ def gerar_briefing_com_gemini(lista_noticias):
         
     prompt = f"""
     Você é um Analista Sênior de Inteligência de Mercado especializado em Crédito Bancário e Varejo (PF).
-    Com base nas notícias do dia, você deve gerar DUAS saídas estritamente profissionais, separadas por uma linha de hífens exatamente como esta: ---
+    Com base nas notícias do dia, gere DUAS saídas profissionais distintas, obrigatoriamente separadas pela tag [DIVISOR].
 
     VERSÃO 1: Relatório Completo (HTML)
-    Escreva uma análise aprofundada estruturada nestes 3 tópicos:
+    Escreva uma análise aprofundada estruturada estritamente nestes 3 tópicos com emojis:
     🚨 PRINCIPAL MOVIMENTO:
     📊 MACRO E JUROS:
     💳 COMPORTAMENTO DO CONSUMIDOR:
 
-    ---
+    [DIVISOR]
 
     VERSÃO 2: Resumo de Bolso (WhatsApp)
-    Escreva um resumo ultra-executivo, direto e focado no ecossistema de crédito e bancos. 
-    Use no máximo 3 tópicos curtos de uma única linha cada, usando marcadores simples (ex: * • ). Mantenha o texto extremamente enxuto.
-
+    Escreva um resumo executivo ultra-enxuto para leitura rápida no celular. 
+    Use exatamente 3 tópicos de uma linha cada, iniciados por um hífen e um marcador simples (ex: - •). 
+    Seja extremamente direto e curto para respeitar os limites de caracteres de texto.
+    
     Notícias do dia:
     {bloco_noticias}
     """
@@ -80,10 +81,10 @@ def gerar_briefing_com_gemini(lista_noticias):
         contents=prompt,
     )
     
-    partes = response.text.split("---")
+    partes = response.text.split("[DIVISOR]")
     
     html_txt = partes[0].strip()
-    zap_txt = partes[1].strip() if len(partes) > 1 else "Acesse o painel para conferir os destaques do dia."
+    zap_txt = partes[1].strip() if len(partes) > 1 else "Acesse o painel para conferir as atualizações."
     
     return html_txt, zap_txt
 
@@ -141,7 +142,7 @@ def construir_pagina_html(conteudo_ia, lista_noticias):
 </html>"""
     return html_code
 
-def Skinner_id_repo_fix():
+def obter_dados_repositorio():
     repo_completo = os.getenv("GITHUB_REPOSITORY")
     if repo_completo:
         return repo_completo.split("/")
@@ -150,10 +151,27 @@ def Skinner_id_repo_fix():
 def publicar_no_github(html_conteudo):
     print("🚀 Enviando relatório para o GitHub...")
     token = os.getenv("GITHUB_TOKEN")
-    user, repo = Skinner_id_repo_fix()
+    user, repo = obter_dados_repositorio()
     
     if not token or not repo:
-        print("❌ ERRO: Credenciais do GitHub ausentes.")
+        print("❌ ERRO: Credenciais ou variáveis do GitHub ausentes.")
         return None
         
-    filename =
+    filename = "index.html"
+    url = f"https://api.github.com/repos/{user}/{repo}/contents/{filename}"
+    
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    
+    conteudo_bytes = html_conteudo.encode('utf-8')
+    conteudo_base64 = base64.b64encode(conteudo_bytes).decode('utf-8')
+    
+    sha = None
+    res_get = requests.get(url, headers=headers)
+    if res_get.status_code == 200:
+        sha = res_get.json().get("sha")
+        
+    dados = {
+        "message": f"Atualizando briefing matinal
