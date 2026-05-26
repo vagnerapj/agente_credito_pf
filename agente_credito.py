@@ -55,38 +55,54 @@ def buscar_noticias_credito():
         except Exception as e:
             print(f"⚠️ Erro ao ler o portal {url}: {e}")
                 
-    print(f"✅ Curadoria finalizada. {len(noticias_relevantes)} fontes estritamente relevantes selecionadas.")
+    print(f"✅ Curadoria finalizada. {len(noticias_relevantes)} fontes relevantes selecionadas.")
     return noticias_relevantes[:8]
 
 def gerar_briefing_com_gemini(lista_noticias):
     if not lista_noticias:
-        return "<p>Nenhuma movimentação expressiva de crédito PF reportada hoje.</p>", "Sem novidades relevantes."
+        return "<li>Sem movimentações de impacto registradas hoje.</li>", "<p>Dia sem novidades relevantes.</p>", "Sem novidades relevantes."
         
-    print("🧠 Gemini analisando os impactos e aplicando destaques executivos...")
+    print("🧠 Gemini analisando os impactos e gerando análises de alta qualidade...")
     bloco_noticias = ""
     for i, n in enumerate(lista_noticias, 1):
         bloco_noticias += f"\n[{i}] TÍTULO: {n['titulo']}\nCONTEXTO: {n['resumo_original']}\nLINK: {n['link']}\n"
         
     prompt = (
         "Você é um Analista Sênior de Inteligência de Mercado especializado em Crédito Bancário e Varejo (PF).\n"
-        "Com base no clipping fornecido, gere duas saídas estritamente separadas pela tag [DIVISOR].\n"
+        "Com base no clipping fornecido, gere TRÊS saídas profissionais distintas, separadas estritamente pela tag [DIVISOR].\n"
         "NÃO utilize blocos de código ou marcações markdown como ```html no texto.\n\n"
-        "VERSÃO 1: Relatório Completo (HTML Nativo)\n"
-        "Escreva a análise formatando DIRETAMENTE em parágrafos HTML (<p>). Use exatamente estes tópicos:\n"
-        "<p>🚨 <b>PRINCIPAL MOVIMENTO:</b> [Análise do fato mais relevante] <a href='[LINK DA NOTÍCIA COMPATÍVEL]' target='_blank'>👉 Leia a matéria completa</a></p>\n"
-        "<p>📊 <b>MACRO E JUROS:</b> [Impacto de juros, Selic ou inflação] <a href='[LINK DA NOTÍCIA COMPATÍVEL]' target='_blank'>👉 Leia a matéria completa</a></p>\n"
-        "<p>💳 <b>COMPORTAMENTO DO CONSUMIDOR:</b> [Inadimplência, endividamento ou tomada de crédito] <a href='[LINK DA NOTÍCIA COMPATÍVEL]' target='_blank'>👉 Leia a matéria completa</a></p>\n\n"
-        "DIRETRIZ DE DESTAQUE ANALÍTICO (OBRIGATÓRIO):\n"
-        "Dentro de cada parágrafo do relatório HTML acima, aplique a tag <b>...</b> para destacar em negrito as palavras ou expressões-chave que justificam a importância do fato para o ecossistema de crédito PF.\n"
-        "Exemplos de termos para destacar: variações de taxas (ex: 'alta de 0,5 p.p.'), indicadores de risco (ex: 'alavancagem das famílias', 'inadimplência do rotativo', 'perfil de risco'), ou movimentos de mercado (ex: 'restrição de concessão', 'alongamento de prazo').\n"
-        "Seja cirúrgico: destaque apenas 2 ou 3 expressões cruciais por parágrafo para manter a escaneabilidade do texto.\n"
-        "Nota: Identifique qual link do clipping melhor se associa a cada tema e coloque-o no respectivo 'href'.\n\n"
+        
+        "SAÍDA 1: Tópicos Rápidos (HTML para o Sumário Executivo)\n"
+        "Gere exatamente de 3 a 5 tópicos analíticos e ultra-concisos (massa de 1 linha cada), formatando-os direto com a tag <li>.\n"
+        "foque estritamente em fatos de impacto direto e imediato para o varejo financeiro de crédito.\n"
+        "Exemplo: <li>💳 BC estuda travas no rotativo; Banco Central discute limitar taxas para conter inadimplência.</li>\n\n"
+        
         "[DIVISOR]\n\n"
-        "VERSÃO 2: Resumo de Pocket (WhatsApp)\n"
+        
+        "SAÍDA 2: Análise Profunda (HTML para o Corpo do Relatório)\n"
+        "Gere análises formatadas DIRETAMENTE em parágrafos HTML (<p>). Use os tópicos exatamente assim:\n"
+        "<p>🚨 <b>PRINCIPAL MOVIMENTO:</b> [Análise condensada do fato mais relevante] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<p>📊 <b>MACRO E JUROS:</b> [Impacto de juros, Selic, inflação ou decisões do BC] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<p>💳 <b>COMPORTAMENTO DO CONSUMIDOR:</b> [Tomada de crédito, inadimplência PF ou endividamento] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n\n"
+        
+        "ANÁLISE 'POR QUE IMPORTA' (OBRIGATÓRIO):\n"
+        "Com base nas notícias fornecidas, identifique qual link do clipping representa o FATO mais crítico do dia para a estratégia de varejo de crédito das instituições financeiras.\n"
+        "Escreva um bloco analítico (50 a 80 palavras) focado no impacto estratégico daquela notícia para a instituição (ex: 'Isso afeta a margem', 'Pode reduzir o estoque rotativo', 'Aumenta o provisionamento').\n"
+        "Formate este bloco analítico final exatamente com esta estrutura HTML:\n"
+        "<div class='why-it-matters'>\n"
+        "    <h4>Por que importa</h4>\n"
+        "    <p>[Insira aqui sua análise de impacto estratégico com destaques analíticos em negrito]</p>\n"
+        "</div>\n"
+        "Nota: Identifique qual link do clipping melhor se associa a cada tema e coloque-o no respectivo 'href'.\n\n"
+        
+        "[DIVISOR]\n\n"
+        
+        "SAÍDA 3: Resumo de Pocket (WhatsApp)\n"
         "Escreva um resumo ultra-executivo para celular com exatamente 3 tópicos de no máximo uma linha cada.\n"
         "Cada linha DEVE começar obrigatoriamente com o marcador '• ', seguido de um breve título em negrito representativo da notícia (2 a 4 palavras) e a síntese do fato.\n"
         "Exemplo de formato:\n"
         "• 💳 *Juros do Rotativo:* Banco Central estuda novas travas para conter inadimplência.\n\n"
+        
         f"Clipping de notícias:\n{bloco_noticias}"
     )
     
@@ -96,25 +112,30 @@ def gerar_briefing_com_gemini(lista_noticias):
     )
     
     texto_ia = response.text
-    for tag_sujeira in ["```html", "```HTML", "```", "**VERSÃO 1:**", "**VERSÃO 2:**"]:
+    for tag_sujeira in ["```html", "```HTML", "```", "**SAÍDA 1:**", "**SAÍDA 2:**", "**SAÍDA 3:**"]:
         texto_ia = texto_ia.replace(tag_sujeira, "")
         
     partes = texto_ia.split("[DIVISOR]")
-    html_txt = partes[0].strip()
-    zap_txt = partes[1].strip() if len(partes) > 1 else "Acesse o painel para conferir as atualizações do dia."
     
-    return html_txt, zap_txt
+    topicos_html = partes[0].strip()
+    conteudo_corpo_html = partes[1].strip() if len(partes) > 1 else ""
+    zap_txt = partes[2].strip() if len(partes) > 2 else "Acesse o painel para conferir as atualizações."
+    
+    return topicos_html, conteudo_corpo_html, zap_txt
 
-def construir_pagina_html(conteudo_ia, lista_noticias):
+def construir_pagina_html(topicos_ia, conteudo_ia, lista_noticias):
     print("🎨 Renderizando painel executivo através do template...")
     data_hoje = datetime.now().strftime("%d/%m/%Y")
     
     links_html = "".join(f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>" for n in lista_noticias)
 
+    # Carrega a estrutura isolada criada no template atualizado
     with open("template.html", "r", encoding="utf-8") as f:
         template = f.read()
         
+    # Substitui as novas variáveis analíticas dentro do HTML
     html_final = template.replace("{{DATA_HOJE}}", data_hoje)
+    html_final = html_final.replace("{{TOPICOS_SUMARIO}}", topicos_ia)
     html_final = html_final.replace("{{CONTEUDO_IA}}", conteudo_ia)
     html_final = html_final.replace("{{LINKS_FONTES}}", links_html)
     
@@ -127,7 +148,7 @@ def obter_dados_repositorio():
     return os.getenv("GITHUB_USER", "usuario"), os.getenv("GITHUB_REPO", "agente_credito_pf")
 
 def publicar_no_github(html_conteudo):
-    print("🚀 Enviando relatório atualizado para o GitHub...")
+    print("🚀 Enviando relatório atualizado para o GitHub Pages...")
     token = os.getenv("GITHUB_TOKEN")
     user, repo = obter_dados_repositorio()
     
@@ -145,7 +166,7 @@ def publicar_no_github(html_conteudo):
         sha = res_get.json().get("sha")
         
     dados = {
-        "message": f"Atualizando briefing matinal com destaques analiticos - {datetime.now().strftime('%d/%m/%Y')}",
+        "message": f"Atualizando briefing matinal com Sumário Analítico e Impacto Estratégico - {datetime.now().strftime('%d/%m/%Y')}",
         "content": base64.b64encode(html_conteudo.encode('utf-8')).decode('utf-8')
     }
     if sha:
@@ -172,9 +193,9 @@ def enviar_alerta_whatsapp(link_painel, resumo_executivo):
 
 if __name__ == "__main__":
     noticias_do_dia = buscar_noticias_credito()
-    briefing_html, resumo_zap = gerar_briefing_com_gemini(noticias_do_dia)
-    pagina_html = construir_pagina_html(briefing_html, noticias_do_dia)
-    link_da_pagina = PUBLICAR_NO_GITHUB(pagina_html)
+    sumario_html, briefing_corpo, resumo_zap = gerar_briefing_com_gemini(noticias_do_dia)
+    pagina_html = construir_pagina_html(sumario_html, briefing_corpo, noticias_do_dia)
+    link_da_pagina = publicar_no_github(pagina_html)
     
     if link_da_pagina:
         time.sleep(5)
