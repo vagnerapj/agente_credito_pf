@@ -14,11 +14,11 @@ client = genai.Client()
 
 # Lista de portais (Feeds RSS oficiais de Economia e Finanças)
 FONTES_NOTICIAS = [
-    "[https://valor.globo.com/rss/financas/](https://valor.globo.com/rss/financas/)",           # Valor Econômico
-    "[https://www.infomoney.com.br/onde-investir/feed/](https://www.infomoney.com.br/onde-investir/feed/)", # InfoMoney
-    "[https://g1.globo.com/rss/g1/economia/](https://g1.globo.com/rss/g1/economia/)",            # G1 Globo Economia
-    "[https://economia.estadao.com.br/rss/](https://economia.estadao.com.br/rss/)",            # Estadão Economia
-    "[https://rss.folha.uol.com.br/mercado.xml](https://rss.folha.uol.com.br/mercado.xml)"          # Folha de S.Paulo Mercado
+    "https://valor.globo.com/rss/financas/",           # Valor Econômico
+    "https://www.infomoney.com.br/onde-investir/feed/", # InfoMoney
+    "https://g1.globo.com/rss/g1/economia/",            # G1 Globo Economia
+    "https://economia.estadao.com.br/rss/",            # Estadão Economia
+    "https://rss.folha.uol.com.br/mercado.xml"          # Folha de S.Paulo Mercado
 ]
 
 def buscar_noticias_credito():
@@ -135,7 +135,7 @@ def publicar_no_github(html_conteudo):
         return None
         
     filename = "index.html"
-    url = f"[https://api.github.com/repos/](https://api.github.com/repos/){user}/{repo}/contents/{filename}"
+    url = f"https://api.github.com/repos/{user}/{repo}/contents/{filename}"
     
     headers = {
         "Authorization": f"token {token}",
@@ -183,7 +183,7 @@ def enviar_alerta_whatsapp(link_painel, resumo_executivo):
     )
     
     texto_url = requests.utils.quote(texto_mensagem)
-    url_callmebot = f"[https://api.callmebot.com/whatsapp.php?phone=](https://api.callmebot.com/whatsapp.php?phone=){phone}&text={texto_url}&apikey={apikey}"
+    url_callmebot = f"https://api.callmebot.com/whatsapp.php?phone={phone}&text={texto_url}&apikey={apikey}"
     
     try:
         response = requests.get(url_callmebot)
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     briefing_html, resumo_zap = gerar_briefing_com_gemini(noticias_do_dia)
     
     pagina_html = construir_pagina_html(briefing_html, noticias_do_dia)
-    link_da_pagina =公開_no_github(pagina_html)
+    link_da_pagina = publicar_no_github(pagina_html)
     
     if link_da_pagina:
         print("⏳ Aguardando 10 segundos para indexação do GitHub Pages...")
