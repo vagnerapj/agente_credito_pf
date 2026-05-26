@@ -136,18 +136,17 @@ def construir_pagina_html(conteudo_ia, lista_noticias):
 def publicar_no_github(html_conteudo):
     print("🚀 Enviando relatório para o GitHub...")
     token = os.getenv("GITHUB_TOKEN")
-    user = os.getenv("GITHUB_USER")
     
-    # GITHUB_REPOSITORY vem automaticamente no formato "usuario/nome-do-repo"
-    repo_completo = os.getenv("GITHUB_REPOSITORY") 
+    # O GitHub Actions fornece o caminho completo "usuario/repositorio" automaticamente nesta variável
+    repo_completo = os.getenv("GITHUB_REPOSITORY")
     
-    if repo_completo:
-        # Extrai apenas o nome do repositório depois da barra
-        repo = repo_completo.split("/")[-1]
-    else:
-        # Fallback caso rode localmente
-        repo = os.getenv("GITHUB_REPO", "agente_credito_pf")
+    if not repo_completo or not token:
+        print("❌ ERRO: GITHUB_TOKEN ou GITHUB_REPOSITORY não foram encontrados no ambiente.")
+        return None
         
+    # Divide "usuario/repositorio" em duas partes puras
+    user, repo = repo_completo.split("/")
+    
     filename = "index.html"
     url = f"https://api.github.com/repos/{user}/{repo}/contents/{filename}"
     
