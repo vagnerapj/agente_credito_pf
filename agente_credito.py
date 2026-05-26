@@ -14,11 +14,11 @@ client = genai.Client()
 
 # Lista de portais (Feeds RSS oficiais de Economia e Finanças)
 FONTES_NOTICIAS = [
-    "https://valor.globo.com/rss/financas/",           # Valor Econômico
-    "https://www.infomoney.com.br/onde-investir/feed/", # InfoMoney
-    "https://g1.globo.com/rss/g1/economia/",            # G1 Globo Economia
-    "https://economia.estadao.com.br/rss/",            # Estadão Economia
-    "https://rss.folha.uol.com.br/mercado.xml"          # Folha de S.Paulo Mercado
+    "[https://valor.globo.com/rss/financas/](https://valor.globo.com/rss/financas/)",           # Valor Econômico
+    "[https://www.infomoney.com.br/onde-investir/feed/](https://www.infomoney.com.br/onde-investir/feed/)", # InfoMoney
+    "[https://g1.globo.com/rss/g1/economia/](https://g1.globo.com/rss/g1/economia/)",            # G1 Globo Economia
+    "[https://economia.estadao.com.br/rss/](https://economia.estadao.com.br/rss/)",            # Estadão Economia
+    "[https://rss.folha.uol.com.br/mercado.xml](https://rss.folha.uol.com.br/mercado.xml)"          # Folha de S.Paulo Mercado
 ]
 
 def buscar_noticias_credito():
@@ -48,31 +48,33 @@ def buscar_noticias_credito():
 
 def gerar_briefing_com_gemini(lista_noticias):
     if not lista_noticias:
-        return "Nenhuma movimentação expressiva de crédito PF reportada hoje.", "Sem novidades relevantes."
+        return "<p>Nenhuma movimentação expressiva de crédito PF reportada hoje.</p>", "Sem novidades relevantes."
         
-    print("🧠 Gemini analisando os impactos e gerando relatórios...")
+    print("🧠 Gemini analisando os impactos e gerando relatórios de alta qualidade...")
     bloco_noticias = ""
     for i, n in enumerate(lista_noticias, 1):
         bloco_noticias += f"\n[{i}] TÍTULO: {n['titulo']}\nCONTEXTO: {n['resumo_original']}\n"
         
     prompt = f"""
     Você é um Analista Sênior de Inteligência de Mercado especializado em Crédito Bancário e Varejo (PF).
-    Com base nas notícias do dia, gere DUAS saídas profissionais distintas, obrigatoriamente separadas pela tag [DIVISOR].
+    Com base nas notícias do dia, forneça uma análise macro-executiva, extremamente limpa e sem rodeios.
+    NÃO use cercados de código como ```html, não repita títulos e não use blocos de marcação Markdown no texto.
+    Gere DUAS saídas profissionais distintas, separadas estritamente pela tag [DIVISOR].
 
-    VERSÃO 1: Relatório Completo (HTML)
-    Escreva uma análise aprofundada estruturada estritamente nestes 3 tópicos com emojis:
-    🚨 PRINCIPAL MOVIMENTO:
-    📊 MACRO E JUROS:
-    💳 COMPORTAMENTO DO CONSUMIDOR:
+    VERSÃO 1: Relatório Completo (HTML Nativo)
+    Escreva a análise formatando DIRETAMENTE em parágrafos HTML (<p>). Use os seguintes tópicos exatamente assim, em negrito e com emojis:
+    <p>🚨 <b>PRINCIPAL MOVIMENTO:</b> [Insira aqui um resumo ultra-condensado e analítico do fato mais relevante do dia para o mercado de crédito]</p>
+    <p>📊 <b>MACRO E JUROS:</b> [Insira o impacto de indicadores, Selic, inflação ou decisões do BC coletadas nas notícias]</p>
+    <p>💳 <b>COMPORTAMENTO DO CONSUMIDOR:</b> [Insira a leitura sobre tomada de crédito, endividamento ou inadimplência da PF]</p>
 
     [DIVISOR]
 
     VERSÃO 2: Resumo de Bolso (WhatsApp)
-    Escreva um resumo executivo ultra-enxuto para leitura rápida no celular. 
-    Use exatamente 3 tópicos de uma linha cada, iniciados por um hífen e um marcador simples (ex: - •). 
-    Seja extremamente direto e curto para respeitar os limites de caracteres de texto.
-    
-    Notícias do dia:
+    Escreva um resumo ultra-executivo focado em leitura rápida para tela de celular.
+    Crie exatamente 3 tópicos, onde cada tópico deve ter no máximo uma linha, usando o marcador simples "• ".
+    Seja extremamente cirúrgico e direto.
+
+    Notícias extraídas do clipping:
     {bloco_noticias}
     """
     
@@ -81,7 +83,13 @@ def gerar_briefing_com_gemini(lista_noticias):
         contents=prompt,
     )
     
-    partes = response.text.split("[DIVISOR]")
+    texto_ia = response.text
+    
+    # Limpeza de segurança para remover blocos indesejados de markdown que quebram o layout
+    for tag_sujeira in ["```html", "```HTML", "```", "**VERSÃO 1:**", "**VERSÃO 2:**"]:
+        texto_ia = texto_ia.replace(tag_sujeira, "")
+        
+    partes = texto_ia.split("[DIVISOR]")
     
     html_txt = partes[0].strip()
     zap_txt = partes[1].strip() if len(partes) > 1 else "Acesse o painel para conferir as atualizações."
@@ -89,9 +97,8 @@ def gerar_briefing_com_gemini(lista_noticias):
     return html_txt, zap_txt
 
 def construir_pagina_html(conteudo_ia, lista_noticias):
-    print("🎨 Renderizando página HTML executiva de forma segura...")
+    print("🎨 Renderizando painel executivo com design corrigido...")
     data_hoje = datetime.now().strftime("%d/%m/%Y")
-    conteudo_formatado = conteudo_ia.replace("\n", "<br>")
     
     links_html = ""
     links_vistos = set()
@@ -100,14 +107,13 @@ def construir_pagina_html(conteudo_ia, lista_noticias):
             links_vistos.add(n['link'])
             links_html += f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>"
 
-    # Dividido em f-strings de linha única para evitar quebras do editor do GitHub
-    html_topo = "<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Briefing de Crédito PF</title><style>body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; } .container { max-width: 650px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); } .header { border-bottom: 2px solid #004481; padding-bottom: 15px; margin-bottom: 25px; } .header h1 { color: #004481; margin: 0; font-size: 24px; font-weight: 700; } .date { color: #666; font-size: 14px; margin-top: 5px; } .content { font-size: 16px; line-height: 1.6; color: #2c3e50; } .content br { margin-bottom: 10px; } .sources { margin-top: 35px; padding-top: 20px; border-top: 1px solid #e1e8ed; } .sources h3 { color: #555; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; } .sources ul { padding-left: 20px; font-size: 14px; color: #0066cc; } .sources li { margin-bottom: 8px; } a { color: #004481; text-decoration: none; } a:hover { text-decoration: underline; }</style></head><body><div class='container'>"
+    html_topo = "<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Briefing de Crédito PF</title><style>body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; } .container { max-width: 650px; margin: 20px auto; background: #fff; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); } .header { border-bottom: 3px solid #004481; padding-bottom: 18px; margin-bottom: 25px; } .header h1 { color: #004481; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; } .date { color: #666; font-size: 14px; margin-top: 6px; } .content { font-size: 15px; line-height: 1.7; color: #2c3e50; } .content p { margin-bottom: 18px; } .sources { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e1e8ed; } .sources h3 { color: #555; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; } .sources ul { padding-left: 20px; font-size: 14px; color: #0066cc; margin: 0; } .sources li { margin-bottom: 8px; } a { color: #004481; text-decoration: none; } a:hover { text-decoration: underline; }</style></head><body><div class='container'>"
     
-    html_header = f"<div class='header'><h1>Briefing: Crédito Pessoa Física</h1><div class='date'>📅 Atualizado em: {data_hoje} | Inteligência de Mercado</div></div>"
+    html_header = f"<div class='header'><h1>Briefing Diário: Crédito Pessoa Física</h1><div class='date'>📅 Atualizado em: {data_hoje} | Inteligência de Mercado</div></div>"
     
-    html_corpo = f"<div class='content'>{conteudo_formatado}</div>"
+    html_corpo = f"<div class='content'>{conteudo_ia}</div>"
     
-    html_fontes = f"<div class='sources'><h3>Fontes Monitoradas no Dia</h3><ul>{links_html}</ul></div>"
+    html_fontes = f"<div class='sources'><h3>Fontes Consultadas</h3><ul>{links_html}</ul></div>"
     
     html_rodape = "</div></body></html>"
     
@@ -129,7 +135,7 @@ def publicar_no_github(html_conteudo):
         return None
         
     filename = "index.html"
-    url = f"https://api.github.com/repos/{user}/{repo}/contents/{filename}"
+    url = f"[https://api.github.com/repos/](https://api.github.com/repos/){user}/{repo}/contents/{filename}"
     
     headers = {
         "Authorization": f"token {token}",
@@ -177,7 +183,7 @@ def enviar_alerta_whatsapp(link_painel, resumo_executivo):
     )
     
     texto_url = requests.utils.quote(texto_mensagem)
-    url_callmebot = f"https://api.callmebot.com/whatsapp.php?phone={phone}&text={texto_url}&apikey={apikey}"
+    url_callmebot = f"[https://api.callmebot.com/whatsapp.php?phone=](https://api.callmebot.com/whatsapp.php?phone=){phone}&text={texto_url}&apikey={apikey}"
     
     try:
         response = requests.get(url_callmebot)
@@ -193,7 +199,7 @@ if __name__ == "__main__":
     briefing_html, resumo_zap = gerar_briefing_com_gemini(noticias_do_dia)
     
     pagina_html = construir_pagina_html(briefing_html, noticias_do_dia)
-    link_da_pagina = publicar_no_github(pagina_html)
+    link_da_pagina =公開_no_github(pagina_html)
     
     if link_da_pagina:
         print("⏳ Aguardando 10 segundos para indexação do GitHub Pages...")
