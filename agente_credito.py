@@ -62,7 +62,7 @@ def gerar_briefing_com_gemini(lista_noticias):
     if not lista_noticias:
         return "<li>Sem movimentações de impacto registradas hoje.</li>", "<p>Dia sem novidades relevantes.</p>", "Sem novidades relevantes."
         
-    print("🧠 Gemini analisando os impactos e gerando análises de alta qualidade...")
+    print("🧠 Gemini analisando cenários e gerando impactos individuais por notícia...")
     bloco_noticias = ""
     for i, n in enumerate(lista_noticias, 1):
         bloco_noticias += f"\n[{i}] TÍTULO: {n['titulo']}\nCONTEXTO: {n['resumo_original']}\nLINK: {n['link']}\n"
@@ -74,26 +74,37 @@ def gerar_briefing_com_gemini(lista_noticias):
         
         "SAÍDA 1: Tópicos Rápidos (HTML para o Sumário Executivo)\n"
         "Gere exatamente de 3 a 5 tópicos analíticos e ultra-concisos (massa de 1 linha cada), formatando-os direto com a tag <li>.\n"
-        "foque estritamente em fatos de impacto direto e imediato para o varejo financeiro de crédito.\n"
-        "Exemplo: <li>💳 BC estuda travas no rotativo; Banco Central discute limitar taxas para conter inadimplência.</li>\n\n"
+        "Foque estritamente em fatos de impacto direto e imediato para o varejo financeiro de crédito.\n\n"
         
         "[DIVISOR]\n\n"
         
         "SAÍDA 2: Análise Profunda (HTML para o Corpo do Relatório)\n"
-        "Gere análises formatadas DIRETAMENTE em parágrafos HTML (<p>). Use os tópicos exatamente assim:\n"
-        "<p>🚨 <b>PRINCIPAL MOVIMENTO:</b> [Análise condensada do fato mais relevante] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<p>📊 <b>MACRO E JUROS:</b> [Impacto de juros, Selic, inflação ou decisões do BC] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<p>💳 <b>COMPORTAMENTO DO CONSUMIDOR:</b> [Tomada de crédito, inadimplência PF ou endividamento] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n\n"
+        "Gere a análise estruturada em exatamente três blocos temáticos fixos na ordem abaixo. "
+        "Para CADA um dos três temas, escreva o parágrafo de contexto, inclua o link correspondente e, OBRIGATORIAMENTE, "
+        "adicione o quadro '<div class='why-it-matters'>' adaptado especificamente para aquele tema.\n\n"
         
-        "ANÁLISE 'POR QUE IMPORTA' (OBRIGATÓRIO):\n"
-        "Com base nas notícias fornecidas, identifique qual link do clipping representa o FATO mais crítico do dia para a estratégia de varejo de crédito das instituições financeiras.\n"
-        "Escreva um bloco analítico (50 a 80 palavras) focado no impacto estratégico daquela notícia para a instituição (ex: 'Isso afeta a margem', 'Pode reduzir o estoque rotativo', 'Aumenta o provisionamento').\n"
-        "Formate este bloco analítico final exatamente com esta estrutura HTML:\n"
+        "Siga rigorosamente esta estrutura de tags HTML:\n\n"
+        
+        "<h3>🚨 PRINCIPAL MOVIMENTO</h3>\n"
+        "<p>[Análise condensada do fato mais relevante do dia] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
         "<div class='why-it-matters'>\n"
-        "    <h4>Por que importa</h4>\n"
-        "    <p>[Insira aqui sua análise de impacto estratégico com destaques analíticos em negrito]</p>\n"
-        "</div>\n"
-        "Nota: Identifique qual link do clipping melhor se associa a cada tema e coloque-o no respectivo 'href'.\n\n"
+        "    <h4>Por que importa para o Crédito PF:</h4>\n"
+        "    <p>[Impacto estratégico e de negócios específico desse movimento, usando destaques em <b>negrito</b> para termos críticos]</p>\n"
+        "</div>\n\n"
+        
+        "<h3>📊 MACRO E JUROS</h3>\n"
+        "<p>[Impacto de juros, Selic, inflação ou decisões recentes do BC] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<div class='why-it-matters'>\n"
+        "    <h4>Por que importa para o Crédito PF:</h4>\n"
+        "    <p>[Impacto estratégico específico da macroeconomia na concessão/precificação, usando destaques em <b>negrito</b> para métricas/indicadores]</p>\n"
+        "</div>\n\n"
+        
+        "<h3>💳 COMPORTAMENTO DO CONSUMIDOR</h3>\n"
+        "<p>[Análise sobre tomada de crédito, níveis de inadimplência PF ou endividamento das famílias] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<div class='why-it-matters'>\n"
+        "    <h4>Por que importa para o Crédito PF:</h4>\n"
+        "    <p>[Impacto estratégico específico sobre o risco de carteira, PDD ou comportamento do tomador, usando destaques em <b>negrito</b>]</p>\n"
+        "</div>\n\n"
         
         "[DIVISOR]\n\n"
         
@@ -129,11 +140,9 @@ def construir_pagina_html(topicos_ia, conteudo_ia, lista_noticias):
     
     links_html = "".join(f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>" for n in lista_noticias)
 
-    # Carrega a estrutura isolada criada no template atualizado
     with open("template.html", "r", encoding="utf-8") as f:
         template = f.read()
         
-    # Substitui as novas variáveis analíticas dentro do HTML
     html_final = template.replace("{{DATA_HOJE}}", data_hoje)
     html_final = html_final.replace("{{TOPICOS_SUMARIO}}", topicos_ia)
     html_final = html_final.replace("{{CONTEUDO_IA}}", conteudo_ia)
@@ -166,7 +175,7 @@ def publicar_no_github(html_conteudo):
         sha = res_get.json().get("sha")
         
     dados = {
-        "message": f"Atualizando briefing matinal com Sumário Analítico e Impacto Estratégico - {datetime.now().strftime('%d/%m/%Y')}",
+        "message": f"Atualizando briefing matinal com Por Que Importa individuais - {datetime.now().strftime('%d/%m/%Y')}",
         "content": base64.b64encode(html_conteudo.encode('utf-8')).decode('utf-8')
     }
     if sha:
