@@ -19,13 +19,13 @@ FONTES_NOTICIAS = [
 ]
 
 def buscar_noticias_credito():
-    print("🔄 Iniciando curadoria estrita de notícias sobre crédito...")
+    print("🔄 Iniciando curadoria estrita de notícias sobre crédito e varejo bancário...")
     noticias_relevantes = []
     
     termos_chave = [
-        'crédito', 'inadimplência', 'juros', 'banco', 'financiamento', 
-        'rotativo', 'serasa', 'banco central', 'selic', 'cheque especial', 
-        'consignado', 'endividamento', 'tomada de crédito', 'carteira de crédito'
+        'crédito', 'inadimplência', 'juros', 'banco', 'financiamento', 'pix', 'drex',
+        'rotativo', 'serasa', 'banco central', 'selic', 'cheque especial', 'fintech',
+        'consignado', 'endividamento', 'habitação', 'imobiliário', 'veículos', 'portabilidade'
     ]
     
     termos_bloqueio = [
@@ -56,13 +56,13 @@ def buscar_noticias_credito():
             print(f"⚠️ Erro ao ler o portal {url}: {e}")
                 
     print(f"✅ Curadoria finalizada. {len(noticias_relevantes)} fontes relevantes selecionadas.")
-    return noticias_relevantes[:8]
+    return noticias_relevantes[:12]
 
 def gerar_briefing_com_gemini(lista_noticias):
     if not lista_noticias:
         return "<li>Sem movimentações de impacto registradas hoje.</li>", "<p>Dia sem novidades relevantes.</p>", "Sem novidades relevantes."
         
-    print("🧠 Gemini analisando cenários e gerando impactos individuais por notícia...")
+    print("🧠 Gemini processando matriz analítica com foco regulatório...")
     bloco_noticias = ""
     for i, n in enumerate(lista_noticias, 1):
         bloco_noticias += f"\n[{i}] TÍTULO: {n['titulo']}\nCONTEXTO: {n['resumo_original']}\nLINK: {n['link']}\n"
@@ -78,41 +78,74 @@ def gerar_briefing_com_gemini(lista_noticias):
         
         "[DIVISOR]\n\n"
         
-        "SAÍDA 2: Análise Profunda (HTML para o Corpo do Relatório)\n"
-        "Gere a análise estruturada em exatamente três blocos temáticos fixos na ordem abaixo. "
-        "Para CADA um dos três temas, escreva o parágrafo de contexto, inclua o link correspondente e, OBRIGATORIAMENTE, "
-        "adicione o quadro '<div class='why-it-matters'>' adaptado especificamente para aquele tema.\n\n"
+        "SAÍDA 2: Análise Profunda (HTML para o Corpo do Relatório com 6 Categorias e Notas Metodológicas)\n"
+        "Gere a análise estruturada distribuindo as notícias relevantes nas seis categorias abaixo. "
+        "Caso o clipping do dia não contenha notícias para alguma das categorias, escreva um parágrafo curto informando que não houve movimentação relevante no dia para aquela linha específica, mas inclua a estrutura completa da categoria mesmo assim.\n"
+        "Para CADA uma das seis categorias, inclua o link correspondente e, OBRIGATORIAMENTE, a caixa '<div class='why-it-matters'>'.\n\n"
         
         "Siga rigorosamente esta estrutura de tags HTML:\n\n"
         
-        "<h3>🚨 PRINCIPAL MOVIMENTO</h3>\n"
-        "<p>[Análise condensada do fato mais relevante do dia] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<h3>🏛️ REGULAÇÃO E GRANDES FATOS</h3>\n"
+        "<p>[Análise de novas regras do BC, canetadas governamentais, projetos de lei, ou grandes eventos de impacto sistêmico] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
         "<div class='why-it-matters'>\n"
         "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto estratégico e de negócios específico desse movimento, usando destaques em <b>negrito</b> para termos críticos]</p>\n"
+        "    <p>[Impacto estratégico institucional, usando <b>negrito</b> para termos críticos]</p>\n"
         "</div>\n\n"
         
         "<h3>📊 MACRO E JUROS</h3>\n"
-        "<p>[Impacto de juros, Selic, inflação ou decisões recentes do BC] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<p>[Análise de Selic, inflação ou custo de captação] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
         "<div class='why-it-matters'>\n"
         "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto estratégico específico da macroeconomia na concessão/precificação, usando destaques em <b>negrito</b> para métricas/indicadores]</p>\n"
+        "    <p>[Impacto em spreads, margens e apetite a risco, usando <b>negrito</b>]</p>\n"
         "</div>\n\n"
         
-        "<h3>💳 COMPORTAMENTO DO CONSUMIDOR</h3>\n"
-        "<p>[Análise sobre tomada de crédito, níveis de inadimplência PF ou endividamento das famílias] <a href='[LINK NOTÍCIA]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<h3>💸 CRÉDITO CLEAN (SEM GARANTIA)</h3>\n"
+        "<p>[Análise sobre rotativo, cartão de crédito, cheque especial, consignado e níveis gerais de inadimplência/alavancagem] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
         "<div class='why-it-matters'>\n"
         "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto estratégico específico sobre o risco de carteira, PDD ou comportamento do tomador, usando destaques em <b>negrito</b>]</p>\n"
+        "    <p>[Impacto na qualidade de safra, PDD e provisionamento de linhas limpas, usando <b>negrito</b>]</p>\n"
+        "</div>\n\n"
+        
+        "<h3>🚗 CRÉDITO COLATERALIZADO (COM GARANTIA)</h3>\n"
+        "<p>[Análise sobre financiamento habitacional/imobiliário e crédito automotivo/veículos] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<div class='why-it-matters'>\n"
+        "    <h4>Por que importa para o Crédito PF:</h4>\n"
+        "    <p>[Impacto no LTV (Loan-to-Value), recuperação de ativos, e estabilidade de carteiras colateralizadas, usando <b>negrito</b>]</p>\n"
+        "</div>\n\n"
+        
+        "<h3>🔄 INOVAÇÃO E MEIOS DE PAGAMENTO</h3>\n"
+        "<p>[Análise sobre Pix, Pix Crédito, Drex ou novas infraestruturas de liquidação e pagamento] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<div class='why-it-matters'>\n"
+        "    <h4>Por que importa para o Crédito PF:</h4>\n"
+        "    <p>[Impacto na desintermediação bancária, substituição do plástico e novos entrantes de originação, usando <b>negrito</b>]</p>\n"
+        "</div>\n\n"
+        
+        "<h3>🏁 CONCORRÊNCIA E FINTECHS</h3>\n"
+        "<p>[Análise sobre movimentações de neobanks, carteiras digitais, cooperativas ou fluxos de portabilidade de crédito] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
+        "<div class='why-it-matters'>\n"
+        "    <h4>Por que importa para o Crédito PF:</h4>\n"
+        "    <p>[Impacto na dinâmica competitiva, perda ou ganho de market share e fidelização do cliente, usando <b>negrito</b>]</p>\n"
+        "</div>\n\n"
+        
+        "\n"
+        "<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 40px 0;'>\n"
+        "<div style='background-color: #f8fafc; border-left: 4px solid #475569; padding: 20px; border-radius: 4px;'>\n"
+        "    <h4 style='margin-top: 0; color: #1e293b; font-size: 16px;'>📔 Notas Metodológicas: O que monitoramos</h4>\n"
+        "    <ul style='padding-left: 20px; color: #475569; font-size: 13px; line-height: 1.6;'>\n"
+        "        <li><b>Regulação e Grandes Fatos:</b> Captura novas diretrizes regulatórias (BC, CMN), alterações na legislação do sistema financeiro ou intervenções governamentais estruturais que redefinem os limites e parâmetros operacionais do mercado bancário.</li>\n"
+        "        <li><b>Macro e Juros:</b> Monitora os principais indicadores macroeconômicos (Selic, IPCA, Focus), focando na dinâmica de captação de recursos, custo de capital e compressão ou expansão dos spreads financeiros.</li>\n"
+        "        <li><b>Crédito Clean (Sem Garantia):</b> Concentra as análises em linhas de alto rendimento e risco de cauda elevado (Cartão, Rotativo, Cheque Especial, Consignado), avaliando o endividamento e a tendência imediata das safras de inadimplência e provisões (PDD).</li>\n"
+        "        <li><b>Crédito Colateralizado (Com Garantia):</b> Isola os movimentos de linhas vinculadas a ativos reais (Imobiliário e Automotivo), onde o foco está no ciclo de vida longo, nas taxas estruturais de juros e nos indicadores de garantia de colateral (LTV).</li>\n"
+        "        <li><b>Inovação e Meios de Pagamento:</b> Acompanha as transformações tecnológicas na originação e liquidação financeira (Pix, Drex), mapeando como novos ecossistemas alteram a transacionalidade e competem com os arranjos tradicionais de crédito.</li>\n"
+        "        <li><b>Concorrência e Fintechs:</b> Rastreia o posicionamento estratégico dos players alternativos (neobanks, cooperativas, carteiras), antecipando pressões competitivas sobre taxas, portabilidade e perda de share de mercado.</li>\n"
+        "    </ul>\n"
         "</div>\n\n"
         
         "[DIVISOR]\n\n"
         
         "SAÍDA 3: Resumo de Pocket (WhatsApp)\n"
-        "Escreva um resumo ultra-executivo para celular com exatamente 3 tópicos de no máximo uma linha cada.\n"
-        "Cada linha DEVE começar obrigatoriamente com o marcador '• ', seguido de um breve título em negrito representativo da notícia (2 a 4 palavras) e a síntese do fato.\n"
-        "Exemplo de formato:\n"
-        "• 💳 *Juros do Rotativo:* Banco Central estuda novas travas para conter inadimplência.\n\n"
+        "Escreva um resumo ultra-executivo para celular com exatamente 3 ou 4 tópicos rápidos do dia.\n"
+        "Cada linha DEVE começar obrigatoriamente com o marcador '• ', seguido de um breve título em negrito (2 a 4 palavras) e a síntese do fato relevante.\n\n"
         
         f"Clipping de notícias:\n{bloco_noticias}"
     )
@@ -175,7 +208,7 @@ def publicar_no_github(html_conteudo):
         sha = res_get.json().get("sha")
         
     dados = {
-        "message": f"Atualizando briefing matinal com Por Que Importa individuais - {datetime.now().strftime('%d/%m/%Y')}",
+        "message": f"Matriz consolidada com categoria Regulacao e Grandes Fatos - {datetime.now().strftime('%d/%m/%Y')}",
         "content": base64.b64encode(html_conteudo.encode('utf-8')).decode('utf-8')
     }
     if sha:
