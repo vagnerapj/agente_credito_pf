@@ -146,7 +146,6 @@ def gerar_briefing_com_gemini(lista_noticias):
 
 def construir_pagina_html(topicos_ia, conteudo_ia, lista_noticias):
     print("🎨 Renderizando painel executivo através do template...")
-    # Força a data com base no fuso horário de São Paulo
     data_hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y")
     links_html = "".join(f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>" for n in lista_noticias)
 
@@ -202,4 +201,20 @@ def enviar_alerta_whatsapp(link_painel, resumo_executivo):
     apikey = os.getenv("CALLMEBOT_API_KEY")
     
     texto_mensagem = f"💼 *Briefing Crédito PF*\n\n{resumo_executivo}\n\n🔗 *Painel completo:* {link_painel}"
-    url_callmebot = f"https://api.callme
+    url_callmebot = f"https://api.callmebot.com/whatsapp.php?phone={phone}&text={requests.utils.quote(texto_mensagem)}&apikey={apikey}"
+    
+    try:
+        requests.get(url_callmebot)
+        print("🚀 WhatsApp enviado com sucesso!")
+    except Exception as e:
+        print(f"❌ Falha ao disparar o WhatsApp: {e}")
+
+if __name__ == "__main__":
+    noticias_do_dia = buscar_noticias_credito()
+    sumario_html, briefing_corpo, resumo_zap = gerar_briefing_com_gemini(noticias_do_dia)
+    pagina_html = construir_pagina_html(sumario_html, briefing_corpo, noticias_do_dia)
+    link_da_pagina = publicar_no_github(pagina_html)
+    
+    if link_da_pagina:
+        time.sleep(5)
+        enviar_alerta_whatsapp(link_da_pagina, resumo_zap)
