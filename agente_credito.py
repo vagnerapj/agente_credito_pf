@@ -29,10 +29,23 @@ def buscar_noticias_credito():
         'consignado', 'endividamento', 'habitação', 'imobiliário', 'veículos', 'portabilidade'
     ]
     
+    # Filtro cirúrgico: mantendo termos de mercado acionário e balanços para análise semântica da IA
     termos_bloqueio = [
-        'mega-sena', 'megasena', 'loteria', 'concurso', 'imóveis em joão pessoa', 
-        'vagas de emprego', 'bolsa de valores', 'petrobras', 'vale', 'cripto', 
-        'bitcoin', 'dividendos', 'ações caem', 'ações sobem', 'resultado trimestral'
+        # 1. CLASSIFICADOS E VAREJO IMOBILIÁRIO LOCAL
+        'apartamento à venda', 'apartamentos à venda', 'casa à venda', 'casas à venda', 
+        'feirão de imóveis', 'feirao de imoveis', 'lançamento imobiliário', 'lancamento imobiliario',
+        'aluga-se', 'aluguel de temporada', 'incorporadora lança',
+
+        # 2. MICRO-NOTICIÁRIO DE RH E CARREIRAS
+        'vagas de emprego', 'vagas de estágio', 'vagas de estagio', 'processo seletivo', 
+        'trabalhe conosco',
+
+        # 3. COMMODITIES E SETORES SEM CORRELAÇÃO DIRETA COM CRÉDITO PF
+        'petrobras', 'vale', 'commodities', 'minério de ferro', 'petróleo',
+
+        # 4. ATIVOS DIGITAIS ESPECULATIVOS E SORTEIOS
+        'bitcoin', 'cripto', 'criptomoedas', 'ethereum', 'defi', 'nft',
+        'mega-sena', 'megasena', 'loteria', 'concurso', 'quadra', 'quina'
     ]
     
     for url in FONTES_NOTICIAS:
@@ -73,22 +86,24 @@ def gerar_briefing_com_gemini(lista_noticias):
         "Com base no clipping fornecido, gere três blocos de conteúdo estritamente delimitados pelas tags informadas.\n"
         "NÃO adicione introduções, explicações ou marcações markdown como ```html no texto.\n\n"
         
+        "DIRETRIZ DE FILTRAGEM INTELIGENTE:\n"
+        "Ignore o sobe-e-desce diário comum da bolsa de valores ou balanços de empresas industriais puras. "
+        "Contudo, se houver oscilações drásticas baseadas em resultados trimestrais de grandes bancos, neobanks ou eventos de crédito corporativo que possam gerar efeito cascata no varejo, capture o fato e destaque o impacto no grupo adequado.\n\n"
+        
         "1) Entre as tags [INICIO_SUMARIO] e [FIM_SUMARIO], gere de 3 a 4 tópicos executivos no formato <li> para o Sumário Executivo.\n"
         "Cada tópico DEVE começar obrigatoriamente com um mini-título em negrito (2 a 4 palavras) que resume o fato, seguido de dois pontos e a síntese do impacto.\n"
         "Exemplo: <li><b>Risco INSS:</b> Vazamento de dados de CPFs vivos gera alerta de fraudes...</li>\n\n"
         
         "2) Entre as tags [INICIO_CORPO] e [FIM_CORPO], distribua as análises nas 6 categorias abaixo.\n"
         "REGRA CRÍTICA DE FORMATO PARA OS 6 GRUPOS:\n"
-        "Se houver MAIS DE UMA notícia para a mesma categoria, liste-as obrigatoriamente em formato de tópicos (usando a tag <ul> e <li>).\n"
-        "Cada item da lista (cada notícia) deve trazer um pequeno título descritivo próprio, um breve resumo analítico focado no mercado de crédito e o respectivo link de acesso.\n"
-        "Se houver apenas uma notícia, coloque-a direto na tag <ul>/<li> para manter o padrão visual.\n"
-        "Se não houver movimentação para a categoria, insira apenas um parágrafo simples informando o cenário neutro.\n\n"
+        "Todas as notícias integradas em um grupo devem ser exibidas obrigatoriamente como tópicos de uma lista utilizando as tags <ul> e <li>.\n"
+        "Cada item da lista (cada notícia individual) deve trazer um pequeno título descritivo próprio em negrito, um breve resumo analítico focado no mercado de crédito e o respectivo link de acesso.\n"
+        "Se não houver movimentação para a categoria, insira apenas um parágrafo simples informando o cenário neutro, mantendo o h3 do grupo.\n\n"
         
         "SIGA EXATAMENTE ESTE PADRÃO DE TAGS PARA O CORPO:\n"
         "<h3>🏛️ REGULAÇÃO E GRANDES FATOS</h3>\n"
         "<ul>\n"
-        "    <li><b>[Mini-título da Notícia 1]:</b> [Resumo analítico focado no impacto de crédito] <a href='[LINK_1]' target='_blank'>👉 Ver notícia completa</a></li>\n"
-        "    <li><b>[Mini-título da Notícia 2]:</b> [Resumo analítico focado no impacto de crédito] <a href='[LINK_2]' target='_blank'>👉 Ver notícia completa</a></li>\n"
+        "    <li><b>[Mini-título da Notícia]:</b> [Resumo analítico focado no impacto de crédito] <a href='[LINK]' target='_blank'>👉 Ver notícia completa</a></li>\n"
         "</ul>\n\n"
         
         "<h3>📊 MACRO E JUROS</h3>\n"
@@ -126,7 +141,7 @@ def gerar_briefing_com_gemini(lista_noticias):
         "        <li><b>Crédito Clean (Sem Garantia):</b> Concentra as análises em linhas de alto rendimento e risco de cauda elevado (Cartão, Rotativo, Cheque Especial, Consignado), avaliando o endividamento e a tendência imediata das safras de inadimplência e provisões (PDD).</li>\n"
         "        <li><b>Crédito Colateralizado (Com Garantia):</b> Isola os movimentos de linhas vinculadas a ativos reais (Imobiliário e Automotivo), onde o foco está no ciclo de vida longo, nas taxas estruturais de juros e nos indicadores de garantia de colateral (LTV).</li>\n"
         "        <li><b>Inovação e Meios de Pagamento:</b> Acompanha as transformações tecnológicas na originação e liquidação financeira (Pix, Drex), mapeando como novos ecossistemas alteram a transacionalidade e competem com os arranjos tradicionais de crédito.</li>\n"
-        "        <li><b>Concorrência e Fintechs:</b> Rastreia o positioning estratégico dos players alternativos (neobanks, cooperativas, carteiras), antecipando pressões competitivas sobre taxas, portabilidade e perda de share de mercado.</li>\n"
+        "        <li><b>Concorrência e Fintechs:</b> Rastreia o posicionamento estratégico dos players alternativos (neobanks, cooperativas, carteiras), antecipando pressões competitivas sobre taxas, portabilidade e perda de share de mercado.</li>\n"
         "    </ul>\n"
         "</div>\n\n"
         
@@ -206,7 +221,7 @@ def publicar_no_github(html_conteudo):
         sha = res_get.json().get("sha")
         
     dados = {
-        "message": f"Evolucao de layout: espelhamento de sumario e listagem por bullets - {datetime.now(ZoneInfo('America/Sao_Paulo')).strftime('%d/%m/%Y')}",
+        "message": f"Filtros semanticos avançados e espelhamento executivo de layout - {datetime.now(ZoneInfo('America/Sao_Paulo')).strftime('%d/%m/%Y')}",
         "content": base64.b64encode(html_conteudo.encode('utf-8')).decode('utf-8')
     }
     if sha:
