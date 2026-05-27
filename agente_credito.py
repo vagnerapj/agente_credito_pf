@@ -6,6 +6,7 @@ import time
 from google import genai
 from dotenv import load_dotenv
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 client = genai.Client()
@@ -42,7 +43,7 @@ def buscar_noticias_credito():
                 resumo = noticia.get('summary', '')
                 texto_analise = (titulo + " " + resumo).lower()
                 
-                if any(bloqueio in texto_analise for bytecode in termos_bloqueio):
+                if any(bloqueio in texto_analise for bloqueio in termos_bloqueio):
                     continue
                     
                 if any(termo in texto_analise for termo in termos_chave):
@@ -145,7 +146,8 @@ def gerar_briefing_com_gemini(lista_noticias):
 
 def construir_pagina_html(topicos_ia, conteudo_ia, lista_noticias):
     print("🎨 Renderizando painel executivo através do template...")
-    data_hoje = datetime.now().strftime("%d/%m/%Y")
+    # Força a data com base no fuso horário de São Paulo
+    data_hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y")
     links_html = "".join(f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>" for n in lista_noticias)
 
     with open("template.html", "r", encoding="utf-8") as f:
@@ -183,7 +185,7 @@ def publicar_no_github(html_conteudo):
         sha = res_get.json().get("sha")
         
     dados = {
-        "message": f"Ajuste estrito de layout e remocao de why-it-matters - {datetime.now().strftime('%d/%m/%Y')}",
+        "message": f"Ajuste estrito de layout e correcao do fuso horario SP - {datetime.now(ZoneInfo('America/Sao_Paulo')).strftime('%d/%m/%Y')}",
         "content": base64.b64encode(html_conteudo.encode('utf-8')).decode('utf-8')
     }
     if sha:
@@ -200,20 +202,4 @@ def enviar_alerta_whatsapp(link_painel, resumo_executivo):
     apikey = os.getenv("CALLMEBOT_API_KEY")
     
     texto_mensagem = f"💼 *Briefing Crédito PF*\n\n{resumo_executivo}\n\n🔗 *Painel completo:* {link_painel}"
-    url_callmebot = f"https://api.callmebot.com/whatsapp.php?phone={phone}&text={requests.utils.quote(texto_mensagem)}&apikey={apikey}"
-    
-    try:
-        requests.get(url_callmebot)
-        print("🚀 WhatsApp enviado com sucesso!")
-    except Exception as e:
-        print(f"❌ Falha ao disparar o WhatsApp: {e}")
-
-if __name__ == "__main__":
-    noticias_do_dia = buscar_noticias_credito()
-    sumario_html, briefing_corpo, resumo_zap = gerar_briefing_com_gemini(noticias_do_dia)
-    pagina_html = construir_pagina_html(sumario_html, briefing_corpo, noticias_do_dia)
-    link_da_pagina = publicar_no_github(pagina_html)
-    
-    if link_da_pagina:
-        time.sleep(5)
-        enviar_alerta_whatsapp(link_da_pagina, resumo_zap)
+    url_callmebot = f"https://api.callme
