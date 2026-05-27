@@ -42,7 +42,7 @@ def buscar_noticias_credito():
                 resumo = noticia.get('summary', '')
                 texto_analise = (titulo + " " + resumo).lower()
                 
-                if any(bloqueio in texto_analise for bloqueio in termos_bloqueio):
+                if any(bloqueio in texto_analise for bytecode in termos_bloqueio):
                     continue
                     
                 if any(termo in texto_analise for termo in termos_chave):
@@ -62,70 +62,38 @@ def gerar_briefing_com_gemini(lista_noticias):
     if not lista_noticias:
         return "<li>Sem movimentações de impacto registradas hoje.</li>", "<p>Dia sem novidades relevantes.</p>", "Sem novidades relevantes."
         
-    print("🧠 Gemini processando matriz analítica com foco regulatório...")
+    print("🧠 Gemini gerando conteúdo estruturado...")
     bloco_noticias = ""
     for i, n in enumerate(lista_noticias, 1):
         bloco_noticias += f"\n[{i}] TÍTULO: {n['titulo']}\nCONTEXTO: {n['resumo_original']}\nLINK: {n['link']}\n"
         
     prompt = (
         "Você é um Analista Sênior de Inteligência de Mercado especializado em Crédito Bancário e Varejo (PF).\n"
-        "Com base no clipping fornecido, gere TRÊS saídas profissionais distintas, separadas estritamente pela tag [DIVISOR].\n"
-        "NÃO utilize blocos de código ou marcações markdown como ```html no texto.\n\n"
+        "Com base no clipping fornecido, gere três blocos de conteúdo estritamente delimitados pelas tags informadas.\n"
+        "NÃO adicione introduções, explicações ou marcações markdown como ```html no texto.\n\n"
         
-        "SAÍDA 1: Tópicos Rápidos (HTML para o Sumário Executivo)\n"
-        "Gere exatamente de 3 a 5 tópicos analíticos e ultra-concisos (massa de 1 linha cada), formatando-os direto com a tag <li>.\n"
-        "Foque estritamente em fatos de impacto direto e imediato para o varejo financeiro de crédito.\n\n"
+        "1) Entre as tags [INICIO_SUMARIO] e [FIM_SUMARIO], gere de 3 a 5 tópicos rápidos no formato <li> para o Sumário Executivo.\n"
+        "2) Entre as tags [INICIO_CORPO] e [FIM_CORPO], distribua as análises nas 6 categorias abaixo, usando EXATAMENTE a estrutura HTML especificada (apenas h3, p e o link, sem blocos adicionais). Se não houver notícia para a categoria, informe em um parágrafo curto.\n"
+        "3) Entre as tags [INICIO_ZAP] e [FIM_ZAP], gere o texto para o WhatsApp (3 a 4 tópicos com '• ' e negritos).\n\n"
         
-        "[DIVISOR]\n\n"
-        
-        "SAÍDA 2: Análise Profunda (HTML para o Corpo do Relatório com 6 Categorias e Notas Metodológicas)\n"
-        "Gere a análise estruturada distribuindo as notícias relevantes nas seis categorias abaixo. "
-        "Caso o clipping do dia não contenha notícias para alguma das categorias, escreva um parágrafo curto informando que não houve movimentação relevante no dia para aquela linha específica, mas inclua a estrutura completa da categoria mesmo assim.\n"
-        "Para CADA uma das seis categorias, inclua o link correspondente e, OBRIGATORIAMENTE, a caixa '<div class='why-it-matters'>'.\n\n"
-        
-        "Siga rigorosamente esta estrutura de tags HTML:\n\n"
-        
+        "ESTRUTURA RIGOROSA DO CORPO DO RELATÓRIO:\n"
         "<h3>🏛️ REGULAÇÃO E GRANDES FATOS</h3>\n"
-        "<p>[Análise de novas regras do BC, canetadas governamentais, projetos de lei, ou grandes eventos de impacto sistêmico] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<div class='why-it-matters'>\n"
-        "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto estratégico institucional, usando <b>negrito</b> para termos críticos]</p>\n"
-        "</div>\n\n"
+        "<p>[Análise condensada aqui] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n\n"
         
         "<h3>📊 MACRO E JUROS</h3>\n"
-        "<p>[Análise de Selic, inflação ou custo de captação] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<div class='why-it-matters'>\n"
-        "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto em spreads, margens e apetite a risco, usando <b>negrito</b>]</p>\n"
-        "</div>\n\n"
+        "<p>[Análise condensada aqui] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n\n"
         
         "<h3>💸 CRÉDITO CLEAN (SEM GARANTIA)</h3>\n"
-        "<p>[Análise sobre rotativo, cartão de crédito, cheque especial, consignado e níveis gerais de inadimplência/alavancagem] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<div class='why-it-matters'>\n"
-        "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto na qualidade de safra, PDD e provisionamento de linhas limpas, usando <b>negrito</b>]</p>\n"
-        "</div>\n\n"
+        "<p>[Análise condensada aqui] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n\n"
         
         "<h3>🚗 CRÉDITO COLATERALIZADO (COM GARANTIA)</h3>\n"
-        "<p>[Análise sobre financiamento habitacional/imobiliário e crédito automotivo/veículos] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<div class='why-it-matters'>\n"
-        "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto no LTV (Loan-to-Value), recuperação de ativos, e estabilidade de carteiras colateralizadas, usando <b>negrito</b>]</p>\n"
-        "</div>\n\n"
+        "<p>[Análise condensada aqui] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n\n"
         
         "<h3>🔄 INOVAÇÃO E MEIOS DE PAGAMENTO</h3>\n"
-        "<p>[Análise sobre Pix, Pix Crédito, Drex ou novas infraestruturas de liquidação e pagamento] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<div class='why-it-matters'>\n"
-        "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto na desintermediação bancária, substituição do plástico e novos entrantes de originação, usando <b>negrito</b>]</p>\n"
-        "</div>\n\n"
+        "<p>[Análise condensada aqui] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n\n"
         
         "<h3>🏁 CONCORRÊNCIA E FINTECHS</h3>\n"
-        "<p>[Análise sobre movimentações de neobanks, carteiras digitais, cooperativas ou fluxos de portabilidade de crédito] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n"
-        "<div class='why-it-matters'>\n"
-        "    <h4>Por que importa para o Crédito PF:</h4>\n"
-        "    <p>[Impacto na dinâmica competitiva, perda ou ganho de market share e fidelização do cliente, usando <b>negrito</b>]</p>\n"
-        "</div>\n\n"
+        "<p>[Análise condensada aqui] <a href='[LINK]' target='_blank'>👉 Leia matéria</a></p>\n\n"
         
         "\n"
         "<hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 40px 0;'>\n"
@@ -141,12 +109,6 @@ def gerar_briefing_com_gemini(lista_noticias):
         "    </ul>\n"
         "</div>\n\n"
         
-        "[DIVISOR]\n\n"
-        
-        "SAÍDA 3: Resumo de Pocket (WhatsApp)\n"
-        "Escreva um resumo ultra-executivo para celular com exatamente 3 ou 4 tópicos rápidos do dia.\n"
-        "Cada linha DEVE começar obrigatoriamente com o marcador '• ', seguido de um breve título em negrito (2 a 4 palavras) e a síntese do fato relevante.\n\n"
-        
         f"Clipping de notícias:\n{bloco_noticias}"
     )
     
@@ -156,21 +118,34 @@ def gerar_briefing_com_gemini(lista_noticias):
     )
     
     texto_ia = response.text
-    for tag_sujeira in ["```html", "```HTML", "```", "**SAÍDA 1:**", "**SAÍDA 2:**", "**SAÍDA 3:**"]:
-        texto_ia = texto_ia.replace(tag_sujeira, "")
+    
+    # Extração limpa baseada em delimitadores estritos
+    try:
+        topicos_html = texto_ia.split("[INICIO_SUMARIO]")[1].split("[FIM_SUMARIO]")[0].strip()
+    except:
+        topicos_html = "<li>Erro na geração do sumário. Acesse as fontes completas abaixo.</li>"
         
-    partes = texto_ia.split("[DIVISOR]")
-    
-    topicos_html = partes[0].strip()
-    conteudo_corpo_html = partes[1].strip() if len(partes) > 1 else ""
-    zap_txt = partes[2].strip() if len(partes) > 2 else "Acesse o painel para conferir as atualizações."
-    
+    try:
+        conteudo_corpo_html = texto_ia.split("[INICIO_CORPO]")[1].split("[FIM_CORPO]")[0].strip()
+    except:
+        conteudo_corpo_html = "<p>Erro na formatação do relatório.</p>"
+        
+    try:
+        zap_txt = texto_ia.split("[INICIO_ZAP]")[1].split("[FIM_ZAP]")[0].strip()
+    except:
+        zap_txt = "Acesse o painel para conferir as atualizações de Crédito PF."
+        
+    # Limpeza final preventiva contra vazamento de tags markdown
+    for tag_sujeira in ["```html", "```HTML", "```"]:
+        topicos_html = topicos_html.replace(tag_sujeira, "")
+        conteudo_corpo_html = conteudo_corpo_html.replace(tag_sujeira, "")
+        zap_txt = zap_txt.replace(tag_sujeira, "")
+        
     return topicos_html, conteudo_corpo_html, zap_txt
 
 def construir_pagina_html(topicos_ia, conteudo_ia, lista_noticias):
     print("🎨 Renderizando painel executivo através do template...")
     data_hoje = datetime.now().strftime("%d/%m/%Y")
-    
     links_html = "".join(f"<li><a href='{n['link']}' target='_blank'>{n['titulo']}</a></li>" for n in lista_noticias)
 
     with open("template.html", "r", encoding="utf-8") as f:
@@ -208,7 +183,7 @@ def publicar_no_github(html_conteudo):
         sha = res_get.json().get("sha")
         
     dados = {
-        "message": f"Matriz consolidada com categoria Regulacao e Grandes Fatos - {datetime.now().strftime('%d/%m/%Y')}",
+        "message": f"Ajuste estrito de layout e remocao de why-it-matters - {datetime.now().strftime('%d/%m/%Y')}",
         "content": base64.b64encode(html_conteudo.encode('utf-8')).decode('utf-8')
     }
     if sha:
