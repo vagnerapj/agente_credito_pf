@@ -145,7 +145,11 @@ def gerar_briefing_com_gemini(lista_noticias):
         "    </ul>\n"
         "</div>\n\n"
         
-        "3) Entre as tags [INICIO_ZAP] e [FIM_ZAP], gere o texto para o WhatsApp (3 a 4 tópicos com '• ' e o mini-título em negrito, idêntico ao conteúdo do sumário executivo, mas sem formatação HTML).\n\n"
+        "3) Entre as tags [INICIO_ZAP] e [FIM_ZAP], gere o texto para o WhatsApp.\n"
+        "REGRA ULTRA ESTRETA: Gere de 3 a 4 tópicos curtos (usando '• '). "
+        "Cada tópico deve ter NO MÁXIMO 15 a 20 palavras (uma linha e meia no celular). "
+        "Seja extremamente direto, focado apenas no fato e na direção do impacto, sem rodeios ou adjetivações longas, "
+        "para evitar que a mensagem estoure o limite de tamanho da API."
         
         f"Clipping de notícias:\n{bloco_noticias}"
     )
