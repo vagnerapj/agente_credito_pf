@@ -233,11 +233,12 @@ def publicar_no_github(html_conteudo):
     return None
 
 def enviar_alerta_whatsapp(link_painel, resumo_executivo):
-    print("📲 Acionando o Callmebot...")
+    print("📲 Acionando o Callmebot com prioridade de Link...")
     phone = os.getenv("CALLMEBOT_PHONE")
     apikey = os.getenv("CALLMEBOT_API_KEY")
     
-    texto_mensagem = f"💼 *Briefing Crédito PF*\n\n{resumo_executivo}\n\n🔗 *Painel completo:* {link_painel}"
+    # Colocamos o link no topo. Se a API truncar o final, seu link do painel está salvo.
+    texto_mensagem = f"💼 *Briefing Crédito PF*\n🔗 *Painel Completo:* {link_painel}\n\n{resumo_executivo}"
     url_callmebot = f"https://api.callmebot.com/whatsapp.php?phone={phone}&text={requests.utils.quote(texto_mensagem)}&apikey={apikey}"
     
     try:
