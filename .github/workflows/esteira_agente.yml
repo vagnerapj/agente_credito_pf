@@ -6,7 +6,7 @@ on:
       - main
   schedule:
     # Configuração oficial para rodar às 07:00 de São Paulo (Segunda a Sexta)
-    - cron: '0 10 * * 1-5'
+    - cron: '47 9 * * *'
   workflow_dispatch:
 
 jobs:
